@@ -278,49 +278,61 @@ static MVPDP*** sort_points(MVPDP **points, unsigned int nbpoints, int sv1_pos, 
     if (!points || !vp || !tree || !counts || !pivots || nbpoints == 0) { return NULL; }
 
     CmpFunc distfunc = tree->dist;
+    int *counts_tmp;
     int bf = tree->branchfactor;
     int lengthM1 = bf-1;
-
-    MVPDP*** bins = (MVPDP***) malloc(bf*sizeof(MVPDP**));
-    if (!bins) return NULL;
-
-    *counts = (int*) calloc(bf, sizeof(int));
-    if (!counts) {
-        free(bins);
-        return NULL;
-    }
-
     int i, k;
+
+    MVPDP*** bins = calloc(bf, sizeof(MVPDP**));
+    if (!bins)
+        goto ERROUT;
+
+    counts_tmp = calloc(bf, sizeof(int));
+    if (!counts_tmp)
+        goto ERROUT;
+    
     for (i=0; i < bf; i++) {
-        bins[i] = (MVPDP**) malloc(nbpoints*sizeof(MVPDP*));
-        if (!bins[i]) { return NULL; }
+        bins[i] = malloc(nbpoints * sizeof(MVPDP*));
+        if (!bins[i])
+            goto ERROUT;
     }
 
     for (i=0;i<nbpoints;i++) {
-        if (i == sv1_pos || i == sv2_pos) { continue; }
+        if (i == sv1_pos || i == sv2_pos)
+            continue;
 
         float d = distfunc(vp, points[i]);
-        if (is_nan(d) || d < 0.0f) {
-            free(counts);
-            free(bins);
-            return NULL;
-        }
+        if (is_nan(d) || d < 0.0f)
+            goto ERROUT;
 
         for (k = 0; k < lengthM1; k++) {
             if (d <= pivots[k]) {
-                bins[k][(*counts)[k]] = points[i];
-                (*counts)[k]++;
+                bins[k][counts_tmp[k]] = points[i];
+                counts_tmp[k]++;
                 break;
             }
         }
 
         if (d > pivots[lengthM1-1]) {
-            bins[lengthM1][(*counts)[lengthM1]] = points[i];
-            (*counts)[lengthM1]++;
+            bins[lengthM1][counts_tmp[lengthM1]] = points[i];
+            counts_tmp[lengthM1]++;
         }
     }
-
+    *counts = counts_tmp;
     return bins;
+ERROUT:
+    if (bins) {
+        for (i = 0; i < bf; i++) {
+            if (!bins[i])
+                break;
+            free(bins[i]);
+        }
+        free(bins);
+    }
+    if (counts_tmp) {
+        free(counts_tmp);
+    }
+    return NULL;
 }
 
 /* Calculate distances for all points from given vantage point, vp, and
