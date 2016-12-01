@@ -29,6 +29,7 @@
 #include <sys/mman.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <assert.h>
 #include "mvptree.h"
 
 #define HEADER_SIZE 32
@@ -297,7 +298,7 @@ static MVPDP*** sort_points(MVPDP **points, unsigned int nbpoints, int sv1_pos, 
             goto ERROUT;
     }
 
-    for (i=0;i<nbpoints;i++) {
+    for (i=0; i<nbpoints; i++) {
         if (i == sv1_pos || i == sv2_pos)
             continue;
 
@@ -618,8 +619,12 @@ static Node* _mvptree_add(MVPTree *tree, Node *node, MVPDP **points, unsigned in
 }
 
 MVPError mvptree_add(MVPTree *tree, MVPDP **points, unsigned int nbpoints) {
+    unsigned int i;
+    float **paths;
+
     MVPError err = MVP_SUCCESS;
-    if (nbpoints == 0) { return err; }
+    if (nbpoints == 0)
+        return err;
 
     if (tree && points) {
         if (tree->datatype == 0) {
@@ -629,17 +634,36 @@ MVPError mvptree_add(MVPTree *tree, MVPDP **points, unsigned int nbpoints) {
             return MVP_TYPEMISMATCH;
         }
 
-        unsigned int i;
-        for (i=0; i < nbpoints; i++) {
-            points[i]->path = (float*) malloc(tree->pathlength*sizeof(float));
-            if (points[i]->path == NULL) {
-                return MVP_PATHALLOC;
+        paths = calloc(nbpoints, sizeof(float*));
+        if (!paths) {
+            err = MVP_PATHALLOC;
+            goto ERROUT;
+        }
+
+        for (i = 0; i < nbpoints; i++) {
+            paths[i] = calloc(tree->pathlength, sizeof(float));
+            if (!paths[i]) {
+                err = MVP_PATHALLOC;
+                goto ERROUT;
             }
-            memset(points[i]->path, 0, tree->pathlength*sizeof(float));
+        }
+        for (i=0; i < nbpoints; i++) {
+            assert(points[i]->path == NULL);
+            points[i]->path = paths[i];
         }
         tree->node = _mvptree_add(tree, tree->node, points, nbpoints, &err, 0);
     } else {
         err = MVP_ARGERR;
+    }
+    return err;
+ERROUT:
+    if (paths) {
+        for (i = 0; i < nbpoints; i++) {
+            if (!paths[i])
+                break;
+            free(paths[i]);
+        }
+        free(paths);
     }
     return err;
 }
