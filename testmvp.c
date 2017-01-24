@@ -246,7 +246,7 @@ int main(int argc, char **argv){
     assert(err == MVP_SUCCESS);
 
 
-    mvptree_clear(tree, free);
+    mvptree_clear(tree, dp_simple_free_func);
     free(tree);
 
 
@@ -298,11 +298,11 @@ int main(int argc, char **argv){
     }
 
     free(results);
-    mvptree_clear(tree, free);
+    mvptree_clear(tree, dp_simple_free_func);
     free(tree);
 
-    dp_free(cluster_center, free);
-    dp_free(savedpoint, free);
+    dp_free(cluster_center, dp_simple_free_func);
+    dp_free(savedpoint, dp_simple_free_func);
 
     printf("Done.\n");
     return 0;

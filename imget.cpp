@@ -280,7 +280,7 @@ cleanup:
         printf("-----------------------------------------------------\n\n");
     }
 
-    mvptree_clear(tree, free);
+    mvptree_clear(tree, dp_simple_free_func);
 
     return 0;
 }

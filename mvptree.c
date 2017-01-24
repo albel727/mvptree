@@ -81,12 +81,18 @@ MVPDP* dp_alloc(MVPDataType type) {
     return newdp;
 }
 
+void dp_simple_free_func(MVPDP *dp) {
+    if (dp) {
+        free(dp->id);
+        free(dp->data);
+    }
+}
+
 void dp_free(MVPDP *dp, MVPFreeFunc free_func) {
     if (dp) {
         if (dp->path) { free(dp->path); }
         if (free_func) {
-            if (dp->id)    free_func(dp->id);
-            if (dp->data) free_func(dp->data);
+            free_func(dp);
         }
         free(dp);
     }

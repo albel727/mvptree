@@ -79,7 +79,10 @@ typedef float (*CmpFunc)(MVPDP *pointA, MVPDP *pointB);
 
 /* Callback function to pass to mvp_clear() to free id and data members of the datapoints, */
 /* since the id and data arrays are allocated by user, not by dp_alloc() function. */
-typedef void (*MVPFreeFunc)(void *ptr);
+typedef void (*MVPFreeFunc)(MVPDP *ptr);
+
+/* Convenience implementation of MVPFreeFunc that uses free() on id and data members */
+void dp_simple_free_func(MVPDP *dp);
 
 typedef struct node_internal_t {
     NodeType type;
