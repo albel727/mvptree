@@ -11,12 +11,12 @@ CC	= cc
 
 CFLAGS	= -g -O3 -I. -Wall $(DEFINES)
 
-CPPFLAGS += -pthread -I /usr/local/include
+CPPFLAGS += -pthread -I /usr/include
 
 LDFLAGS	=
 RANLIB	= ranlib
 
-DESTDIR	= /usr/local
+DDIR	= $(DESTDIR)/usr
 TEST	= testmvp
 TEST2	= testmvp2
 TEST3   = imget
@@ -29,7 +29,7 @@ IMGET_DEFINES = -Dcimg_use_xshm -Dcimg_use_xrandr -Dcimg_use_jpeg
 IMGET_LIBS = -lX11 -lXext -lXrandr -ljpeg
 
 #uncomment to use libprng.a library for random number generation
-#DEPS_LIBS += /usr/local/lib/libprng.a
+#DEPS_LIBS += /usr/lib/libprng.a
 
 
 all : $(TEST) $(TEST2)
@@ -39,9 +39,11 @@ clean :
 	rm -f $(LIBRARY) $(UTIL) $(TEST) $(TEST2) $(TEST3)
 
 install : $(HFLS) $(LIBRARY) 
-	install -c -m 444 $(HFLS) $(DESTDIR)/include
-	install -c -m 444 $(LIBRARY) $(DESTDIR)/lib
-	$(RANLIB) $(DESTDIR)/lib/$(LIBRARY)
+	mkdir -p $(DDIR)/include
+	mkdir -p $(DDIR)/lib
+	install -m 755 $(HFLS) $(DDIR)/include
+	install -m 755 $(LIBRARY) $(DDIR)/lib
+	$(RANLIB) $(DDIR)/lib/$(LIBRARY)
 
 $(LIBRARY) : $(OBJS) $(HFLS)
 	ar cr $(LIBRARY) $?
