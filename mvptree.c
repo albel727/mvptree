@@ -279,7 +279,7 @@ static MVPDP*** sort_points(MVPDP **points, unsigned int nbpoints, int sv1_pos, 
     if (!points || !vp || !tree || !counts || !pivots || nbpoints == 0) { return NULL; }
 
     CmpFunc distfunc = tree->dist;
-    int *counts_tmp;
+    int *counts_tmp = NULL;
     int bf = tree->branchfactor;
     int lengthM1 = bf-1;
     int i, k;
