@@ -657,6 +657,8 @@ MVPError mvptree_add(MVPTree *tree, MVPDP **points, unsigned int nbpoints) {
             assert(points[i]->path == NULL);
             points[i]->path = paths[i];
         }
+        free(paths);
+
         tree->node = _mvptree_add(tree, tree->node, points, nbpoints, &err, 0);
     } else {
         err = MVP_ARGERR;
