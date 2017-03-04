@@ -88,7 +88,7 @@ typedef struct node_internal_t {
     NodeType type;
     MVPDP *sv1, *sv2;
     float *M1, *M2;
-    void **child_nodes;
+    union node_t **child_nodes; //$bf*$bf nodes
 } InternalNode;
 
 typedef struct node_leaf_t {

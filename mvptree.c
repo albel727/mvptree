@@ -153,7 +153,7 @@ static Node* create_internal(unsigned int bf) {
     node->internal.sv2 = NULL;
     node->internal.M1 = (float*) calloc(bf-1, sizeof(float));
     node->internal.M2 = (float*) calloc(bf * (bf-1), sizeof(float));
-    node->internal.child_nodes = calloc(bf*bf, sizeof(Node*));
+    node->internal.child_nodes = (Node**) calloc(bf*bf, sizeof(Node*));
     node->internal.type = INTERNAL_NODE;
 
     return node;
