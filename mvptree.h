@@ -87,15 +87,15 @@ void dp_simple_free_func(MVPDP *dp);
 typedef struct node_internal_t {
     NodeType type;
     MVPDP *sv1, *sv2;
-    float *M1, *M2;
+    float *M1, *M2; //$bf-1 floats and $bf*($bf-1) floats respectively
     union node_t **child_nodes; //$bf*$bf nodes
 } InternalNode;
 
 typedef struct node_leaf_t {
     NodeType type;
     MVPDP *sv1, *sv2;
-    MVPDP **points;
-    float *d1, *d2;
+    MVPDP **points; //$leafcap points
+    float *d1, *d2; //$leafcap floats each
     unsigned int nbpoints;
 } LeafNode;
    

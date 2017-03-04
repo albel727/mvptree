@@ -212,6 +212,8 @@ static int select_vantage_points(MVPDP **points, unsigned int nb,int *sv1_pos, i
     if (!points || !sv1_pos || !sv2_pos || !dist || nb == 0) { return -1; }
 
     *sv1_pos = (nb >= 1) ? 0 : -1;
+    //BUG: we might never choose sv2 even if there are more than 1 point, if all points are equal.
+    //this may lead internal nodes to start comparing with garbage
     *sv2_pos = -1;
 
     float max_dist = 0.0f, d;
@@ -416,6 +418,7 @@ static Node* _mvptree_add(MVPTree *tree, Node *node, MVPDP **points, unsigned in
             for (i=0; i < nbpoints; i++) {
                 if (i == sv1_pos || i == sv2_pos) { continue; }
                 new_node->leaf.d1[count] = dist_fnc(points[i], new_node->leaf.sv1);
+                //BUG: sv2 might not be set, so dist_fnc needs to defend itself from NULLs.
                 new_node->leaf.d2[count] = dist_fnc(points[i], new_node->leaf.sv2);
                 new_node->leaf.points[count++] = points[i];
             }
@@ -434,7 +437,7 @@ static Node* _mvptree_add(MVPTree *tree, Node *node, MVPDP **points, unsigned in
             }
 
             new_node->internal.sv1 = points[sv1_pos];
-            new_node->internal.sv2 = points[sv2_pos];
+            new_node->internal.sv2 = points[sv2_pos]; //BUG: WHAT IF sv2_pos == -1?
 
             if (find_distance_range_for_vp(points,nbpoints,new_node->internal.sv1,tree,lvl) < 0) {
                 *error = MVP_NOSV1RANGE;
@@ -728,6 +731,7 @@ MVPError _mvptree_retrieve(MVPTree *tree,Node *node,MVPDP *target, float radius,
                 /* filter points before checking */
                 if (d1 - radius <= node->leaf.d1[i] && d1 + radius >= node->leaf.d1[i]) {
                     if (d2 - radius <= node->leaf.d2[i] && d2 + radius >= node->leaf.d2[i]) {
+                        //TODO: no need to check lvl and lvl+1 if they're within pathlength, we just did it above.
                         int endpath = (lvl+1 < tree->pathlength) ? lvl+1 : tree->pathlength;
                         int skip = 0;
                         for (j=0; j < endpath; j++) {
