@@ -199,6 +199,7 @@ static void _mvptree_clear(MVPTree *tree, Node *node, MVPFreeFunc free_func, int
 void mvptree_clear(MVPTree *tree, MVPFreeFunc free_func) {
     if (!tree || !tree->node) { return; }
     _mvptree_clear(tree, tree->node, free_func, 0);
+    tree->node = NULL;
 }
 
 /*
